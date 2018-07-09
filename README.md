@@ -1,5 +1,5 @@
 # Urho3D_AlchemyAO
-Alchemy AO algorithm implemented  with Urho3D Engine By LiuZhiChao 2018/6/15.
+Alchemy AO algorithm implemented  with Urho3D Engine By LiuZhiChao
 
 this algorithm's implemention is simple as you can just following original article:
 http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.390.2463&rep=rep1&type=pdf
