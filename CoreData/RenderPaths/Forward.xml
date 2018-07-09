@@ -1,0 +1,47 @@
+<renderpath>
+    <rendertarget name="colorBuffer" sizedivisor="1 1" format="rgba" />
+    <rendertarget name="NDBuffer" sizedivisor="1 1" format="rgba" />
+    <rendertarget name="PosBuffer" sizedivisor="1 1" format="rgba16f" />
+    <rendertarget name="AOBuffer" sizedivisor="1 1" format="rgba" />
+    <rendertarget name="AOBlurV" sizedivisor="1 1" format="rgba" />
+    <rendertarget name="AOBlurH" sizedivisor="1 1" format="rgba" />
+    <rendertarget name="depth" sizedivisor="1 1" format="readabledepth" />
+
+    <command type="clear" color="1 1 1 1" output="NDBuffer"/>
+    <command type="clear" color="1 1 1 1" output="PosBuffer"/>
+    <command type="clear" color="0 0 0 0" output="AOBuffer"/>
+    <command type="clear" color="fog" depth="1.0" stencil="0"  depthstencil="depth" output="colorBuffer"/>
+    <command type="scenepass" pass="base" vertexlights="true" metadata="base" depthstencil="depth" output="colorBuffer"/>
+
+    <command type="forwardlights" pass="light"  depthstencil="depth">
+        <output index="0" name="colorBuffer" />
+        <output index="1" name="PosBuffer" />
+        <output index="2" name="NDBuffer" />
+    </command>
+    <command type="scenepass" pass="postopaque"  depthstencil="depth" output="colorBuffer"/>
+    <command type="scenepass" pass="refract"  depthstencil="depth" output="colorBuffer">
+        <texture unit="environment" name="colorBuffer" />
+    </command>
+    <command type="scenepass" pass="alpha0" vertexlights="false"  depthstencil="depth" output="colorBuffer"/>
+    <command type="scenepass" pass="alpha1" vertexlights="false" sort="backtofront"  depthstencil="depth" output="colorBuffer"/>
+    <command type="scenepass" pass="alpha2" vertexlights="false" sort="backtofront"  depthstencil="depth" output="colorBuffer"/>
+    <command type="scenepass" pass="alpha" vertexlights="true" sort="backtofront" metadata="alpha"  depthstencil="depth" output="colorBuffer"/>
+    <command type="scenepass" pass="postalpha" sort="backtofront"  depthstencil="depth" output="colorBuffer"/>
+    <command type="scenepass" pass="caustic1" sort="backtofront" depthstencil="depth" output="colorBuffer"/>
+
+    <command type="quad" tag="AO" vs="AlchemyAO" ps="AlchemyAO" output="AOBuffer">
+        <texture unit="diffuse" name="PosBuffer" />
+        <texture unit="normal" name="NDBuffer" />
+        <texture unit="SpecMap" name="depth" />
+    </command>
+    
+    <command type="quad" tag="BLUR" vs="Blur" ps="Blur" psdefines="BILATERAL SCALELUMINANCE" output="AOBlurV">
+    	<parameter name="AOSigma" value="20.0" />
+        <texture unit="diffuse" name="AOBuffer" />
+    </command>
+
+    <command type="quad" tag="CopyFramebuffer" vs="CopyFramebuffer" psdefines="AO" ps="CopyFramebuffer" output="viewport">
+        <texture unit="diffuse" name="colorBuffer" />
+        <texture unit="normal" name="AOBlurV" />
+    </command>
+</renderpath>
